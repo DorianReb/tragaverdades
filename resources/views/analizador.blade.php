@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <title>TragaVerdades · Detector de noticias falsas en español</title>
-<meta name="description" content="Analiza noticias y textos en español para estimar su credibilidad y contrastarlos con fuentes de verificación.">
+<meta name="description" content="Explora señales textuales mediante reglas y algoritmos de búsqueda. La clasificación con SaBERT está pendiente.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 @vite(['resources/js/app.js'])
@@ -111,6 +112,22 @@ textarea:focus{border-color:var(--brand);background:#fff}
 .btn.out{background:#fff;color:var(--brand);border:1px solid var(--line)}.btn.out:hover{background:var(--brand-soft)}
 .uname{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink);padding:0 6px}
 .uname i{color:var(--muted)}
+
+/* Laboratorio de Unidad III: información explicable, sin probabilidades */
+.t-kb{grid-column:span 12}
+.kb-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}
+.kb-panel{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fafbfc;min-width:0}
+.kb-panel h3{font-size:14px;margin-bottom:10px}
+.kb-muted{font-size:12px;color:var(--muted);line-height:1.6}
+.kb-chipbox{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.kb-chip{font-size:11px;padding:5px 9px;border-radius:12px;background:var(--brand-soft);color:var(--brand);word-break:break-word}
+.kb-list{font-size:12px;line-height:1.65;padding-left:20px}
+.kb-list li{margin:8px 0;overflow-wrap:anywhere}
+.kb-list strong{font-size:12px}
+.kb-stats{font-size:12px;margin:7px 0 10px;color:var(--brand)}
+.kb-proof ul{padding-left:18px;border-left:1px dashed var(--line);margin:6px 0 6px 10px}
+.kb-proof li{font-size:12px;line-height:1.7;overflow-wrap:anywhere}
+@media(max-width:720px){.kb-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -138,12 +155,13 @@ textarea:focus{border-color:var(--brand);background:#fff}
   <main class="bento">
     <section class="tile t-hero">
       <h1>¿Es verdad lo que acabas de leer?</h1>
-      <p>Pega una noticia, un mensaje de WhatsApp o una publicación en español y estima su credibilidad antes de compartirla.</p>
+      <p>Pega una noticia o publicación en español para explorar señales de alerta y explicar cómo se derivan las recomendaciones.</p>
     </section>
 
     <aside class="tile t-legal">
       <i class="fa-solid fa-circle-info" style="font-size:18px"></i>
-      <p><b>Aviso legal:</b> Los resultados provienen de una clasificación automatizada y son una estimación probabilística. Úsalos como apoyo y contrasta siempre con medios verificados y organizaciones de fact-checking.</p>
+      <p><b>Aviso legal:</b> Los resultados provienen de una clasificación automatizada y son una estimación probabilística.
+          Úsalos solo como apoyo y contrasta siempre con medios verificados y organizaciones de fact-checking.</p>
     </aside>
 
     <aside class="tile t-recent">
@@ -161,7 +179,7 @@ textarea:focus{border-color:var(--brand);background:#fff}
       <div class="in-foot">
         <button class="ghost" id="btn-ejemplo">Ejemplo</button>
         <button class="ghost" id="btn-limpiar">Limpiar</button>
-        <button class="go" id="btn-analizar">Analizar noticia</button>
+        <button class="go" id="btn-analizar" data-endpoint="{{ route('analisis.reglas') }}">Analizar noticia</button>
       </div>
     </section>
 
@@ -169,13 +187,13 @@ textarea:focus{border-color:var(--brand);background:#fff}
       <span class="cap">Resultado</span>
       <div class="badge" id="badge"><i class="fa-solid fa-magnifying-glass"></i></div>
       <div class="verdict" id="verdict">En espera</div>
-      <em id="vsub">Ingresa un texto para comenzar.</em>
+      <em id="vsub">Ingresa un texto para examinar sus señales.</em>
     </section>
 
     <section class="tile t-conf">
-      <div class="row" style="margin:0"><span class="cap">Confianza</span><b id="confnum" style="font-size:15px">—</b></div>
+      <div class="row" style="margin:0"><span class="cap">Reglas ejecutadas</span><b id="confnum" style="font-size:15px">—</b></div>
       <div class="bar"><i id="confbar"></i></div>
-      <div class="row"><span>Clasificación</span><span class="tag" id="class">—</span></div>
+      <div class="row"><span>Recomendación</span><span class="tag" id="class">—</span></div>
     </section>
 
     <section class="tile t-src">
@@ -194,46 +212,194 @@ textarea:focus{border-color:var(--brand);background:#fff}
       <div class="tip"><i class="fa-solid fa-triangle-exclamation"></i><b>Desconfía de la urgencia</b>Las MAYÚSCULAS y "¡compártelo ya!" son bandera roja.</div>
       <div class="tip"><i class="fa-solid fa-code-compare"></i><b>Busca otra versión</b>Si es real, otros medios fiables también lo cubren.</div>
     </section>
+
+    <section class="tile t-kb" id="detalle-reglas" aria-live="polite">
+      <h2><span class="ico"><i class="fa-solid fa-diagram-project"></i></span> Unidad III · Reglas y búsqueda</h2>
+      <p class="kb-muted" id="interpretacion">Al analizar el texto aparecerán los hechos, las reglas activadas y la comparación de búsqueda en anchura y profundidad. Estas señales no certifican la veracidad.</p>
+      <div class="kb-grid">
+        <div class="kb-panel"><h3>Hechos detectados (memoria inicial)</h3><div class="kb-chipbox" id="hechos-base">Sin análisis</div></div>
+        <div class="kb-panel"><h3>Hechos inferidos (memoria final)</h3><div class="kb-chipbox" id="hechos-derivados">Sin análisis</div></div>
+        <div class="kb-panel"><h3>Agenda y mecanismo de control</h3><p class="kb-muted">Las reglas aplicables se seleccionan por prioridad descendente.</p><ol class="kb-list" id="agenda-reglas"></ol></div>
+        <div class="kb-panel"><h3>Reglas de producción activadas</h3><ol class="kb-list" id="reglas-activadas"></ol></div>
+        <div class="kb-panel"><h3>Encadenamiento hacia atrás</h3><div class="kb-proof" id="prueba-atras"><p class="kb-muted">Meta: recomendar_verificacion.</p></div></div>
+        <div class="kb-panel"><h3>Comparación de búsqueda sistemática</h3><p class="kb-muted">Cada transición representa una aplicación de una regla.</p><div class="kb-grid" style="grid-template-columns:1fr 1fr;gap:12px">
+          <div><h3>BFS (anchura)</h3><div class="kb-stats" id="bfs-estadisticas">—</div><ol class="kb-list" id="bfs-recorrido"></ol></div>
+          <div><h3>DFS (profundidad)</h3><div class="kb-stats" id="dfs-estadisticas">—</div><ol class="kb-list" id="dfs-recorrido"></ol></div>
+        </div></div>
+      </div>
+    </section>
   </main>
 </div>
 
 <script>
-const $=id=>document.getElementById(id);
-const text=$('text'),recents=[];
-const EJ='URGENTE!!! Científicos NO QUIEREN que sepas esto: el gobierno oculta un remedio secreto que cura todo. Comparte antes de que lo borren. Según fuentes anónimas, millones ya fueron engañados y los medios callan. ¡Despierta!';
-text.addEventListener('input',()=>$('count').textContent=text.value.length.toLocaleString('es')+' caracteres');
-$('btn-limpiar').onclick=()=>{text.value='';text.dispatchEvent(new Event('input'))};
-$('btn-ejemplo').onclick=()=>{text.value=EJ;text.dispatchEvent(new Event('input'))};
-document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.seg button').forEach(x=>x.classList.remove('on'));b.classList.add('on')});
+const $ = id => document.getElementById(id);
+const text = $('text');
+const recents = [];
+const EJ = 'URGENTE!!! Científicos NO QUIEREN que sepas esto: el gobierno oculta un remedio secreto que cura todo. Comparte antes de que lo borren. Según fuentes anónimas, millones ya fueron engañados y los medios callan. ¡Despierta!';
 
-/* Heurística DEMO: sustituir por llamada a tu modelo/API (fetch a una ruta Laravel). Devuelve riesgo 0-100. */
-function analyze(t){
-  const n=Math.max(t.split(/\s+/).filter(Boolean).length,1);
-  const caps=(t.match(/\b[A-ZÁÉÍÓÚÑ]{4,}\b/g)||[]).length/n;
-  const excl=(t.match(/[!¡]/g)||[]).length/Math.max(t.length/100,1);
-  const sens=(t.match(/urgente|secreto|oculta|no quieren|increíble|impactante|milagro|compart|borren|despierta|callan|conspiraci/gi)||[]).length;
-  const anon=(t.match(/fuentes anónimas|dicen que|según se dice|se rumorea|un amigo|cadena/gi)||[]).length;
-  const cites=(t.match(/según (el|la|los|las)|\bdijo\b|declaró|informó|estudio|publicad[oa] en|\d{1,2} de \w+|«|"|“/gi)||[]).length;
-  const viral=/compart|reenv|viraliz/i.test(t)?85:5;
-  const c=v=>Math.max(0,Math.min(100,v));
-  return Math.round(c(sens*22+excl*14)*.28+c(caps*400)*.12+c(anon*45+(cites?0:15))*.2+c(100-cites*22)*.18+viral*.15+c(100-n*1.2)*.07);
+text.addEventListener('input', () => {
+    $('count').textContent = text.value.length.toLocaleString('es') + ' caracteres';
+});
+$('btn-limpiar').onclick = () => { text.value = ''; text.dispatchEvent(new Event('input')); };
+$('btn-ejemplo').onclick = () => { text.value = EJ; text.dispatchEvent(new Event('input')); };
+document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
+    document.querySelectorAll('.seg button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+});
+
+// Los textos del usuario se muestran con textContent (no con innerHTML).
+function itemTexto(tipo, contenido, clase = '') {
+    const n = document.createElement(tipo);
+    n.textContent = contenido;
+    if (clase) n.className = clase;
+    return n;
 }
-function theme(r){return r<35?{c:'#2e7d57',bg:'#e9f4ee',v:'Bajo riesgo',sub:'Texto con rasgos confiables.',e:'fa-circle-check',cl:'REAL'}:r<62?{c:'#a96a0f',bg:'#fbf1de',v:'Riesgo medio',sub:'Contrasta antes de compartir.',e:'fa-triangle-exclamation',cl:'DUDOSO'}:{c:'#b42318',bg:'#fbeae8',v:'Alto riesgo',sub:'Probable desinformación.',e:'fa-circle-xmark',cl:'FALSA'}}
-function render(r,t,save=true){
-  const th=theme(r),root=document.documentElement.style;
-  root.setProperty('--accent',th.c);root.setProperty('--accent-soft',th.bg);
-  $('badge').innerHTML=`<i class="fa-solid ${th.e}"></i>`;$('verdict').textContent=th.v;$('vsub').textContent=th.sub;$('class').textContent=th.cl;
-  const conf=(Math.abs(r-50)/50*0.5+0.5)*100;$('confnum').textContent=conf.toFixed(2)+'%';$('confbar').style.width=conf+'%';
-  if(!save)return;
-  recents.unshift({snip:t.slice(0,60)+(t.length>60?'…':''),t,r,th});
-  $('empty').style.display='none';
-  $('rlist').innerHTML=recents.slice(0,6).map((x,i)=>`<button class="ritem" data-i="${i}"><p>${x.snip}</p><span class="pill ${x.r<35?'ok':x.r<62?'warn':'bad'}">${x.th.v.toUpperCase()}</span></button>`).join('');
+function pintarChips(id, valores) {
+    const contenedor = $(id);
+    contenedor.replaceChildren();
+    if (!valores || valores.length === 0) {
+        contenedor.append(itemTexto('span', 'Sin hechos en esta categoría', 'kb-muted'));
+        return;
+    }
+    valores.forEach(hecho => contenedor.append(itemTexto('span', hecho, 'kb-chip')));
 }
-$('rlist').onclick=e=>{const b=e.target.closest('.ritem');if(!b)return;const x=recents[+b.dataset.i];text.value=x.t;text.dispatchEvent(new Event('input'));render(x.r,x.t,false)};
-$('btn-analizar').onclick=()=>{
-  const t=text.value.trim();if(t.length<20){text.focus();$('vsub').textContent='Escribe al menos 20 caracteres.';return}
-  const btn=$('btn-analizar'),res=$('result');btn.disabled=true;btn.textContent='Analizando…';res.classList.add('scan');$('badge').innerHTML='<i class="fa-solid fa-spinner"></i>';$('verdict').textContent='Procesando';
-  setTimeout(()=>{render(analyze(t),t);res.classList.remove('scan');btn.disabled=false;btn.textContent='Analizar noticia'},900);
+function pintarReglas(id, reglas) {
+    const contenedor = $(id);
+    contenedor.replaceChildren();
+    if (!reglas || reglas.length === 0) {
+        contenedor.append(itemTexto('li', 'No hay reglas aplicables.'));
+        return;
+    }
+    reglas.forEach(r => {
+        const li = document.createElement('li');
+        li.append(itemTexto('strong', r.id + ' · Prioridad ' + r.prioridad));
+        li.append(itemTexto('div', 'SI ' + r.si.join(' Y ') + ' ENTONCES ' + r.entonces));
+        li.append(itemTexto('div', r.explicacion, 'kb-muted'));
+        contenedor.append(li);
+    });
+}
+function nodoPrueba(prueba) {
+    const ul = document.createElement('ul');
+    const li = document.createElement('li');
+    let nombre = prueba.tipo === 'hecho'
+        ? 'HECHO: ' + prueba.nombre
+        : 'REGLA: ' + prueba.nombre + ' ⇒ ' + prueba.conclusion;
+    li.append(itemTexto('strong', nombre));
+    (prueba.hijos || []).forEach(h => li.append(nodoPrueba(h)));
+    ul.append(li);
+    return ul;
+}
+function pintarBusqueda(estrategia, resultado) {
+    const id = estrategia.toLowerCase();
+    $(id + '-estadisticas').textContent = resultado.encontrada
+        ? `Meta alcanzada · ${resultado.pasos} pasos · ${resultado.explorados} estados explorados`
+        : `Meta no alcanzada · ${resultado.explorados} estados explorados${resultado.limite_alcanzado ? ' · límite alcanzado' : ''}`;
+    const ol = $(id + '-recorrido');
+    ol.replaceChildren();
+    resultado.recorrido.forEach(r => ol.append(itemTexto('li', r.id + ' → ' + r.entonces)));
+    if (!resultado.recorrido.length) ol.append(itemTexto('li', 'Sin recorrido hasta la meta.'));
+}
+function pintarHistorial() {
+    $('empty').style.display = recents.length ? 'none' : '';
+    const contenedor = $('rlist');
+    contenedor.replaceChildren();
+    recents.slice(0, 6).forEach((x, i) => {
+        const boton = document.createElement('button');
+        boton.type = 'button';
+        boton.className = 'ritem';
+        boton.dataset.i = String(i);
+        boton.append(itemTexto('p', x.t.slice(0, 60) + (x.t.length > 60 ? '…' : '')));
+        boton.append(itemTexto('span', x.datos.resultado, 'pill ' + (x.datos.meta_alcanzada ? 'warn' : 'ok')));
+        contenedor.append(boton);
+    });
+}
+function render(datos, texto, guardar = true) {
+    const root = document.documentElement.style;
+    root.setProperty('--accent', datos.meta_alcanzada ? '#a96a0f' : '#1f3a5f');
+    root.setProperty('--accent-soft', datos.meta_alcanzada ? '#fbf1de' : '#eaf0f7');
+    // Íconos elegidos en el código, no proceden del usuario ni del servidor.
+    $('badge').innerHTML = datos.meta_alcanzada
+        ? '<i class="fa-solid fa-triangle-exclamation"></i>'
+        : '<i class="fa-solid fa-circle-info"></i>';
+    $('verdict').textContent = datos.resultado;
+    $('vsub').textContent = datos.interpretacion;
+    $('class').textContent = datos.meta_alcanzada ? 'REVISAR' : 'SIN META';
+    const disparos = datos.reglas_activadas.length;
+    $('confnum').textContent = `${disparos} / ${datos.total_reglas}`;
+    $('confbar').style.width = (100 * disparos / Math.max(datos.total_reglas, 1)) + '%';
+    $('interpretacion').textContent = datos.advertencia + ' ' + datos.interpretacion;
+    pintarChips('hechos-base', datos.hechos_iniciales);
+    pintarChips('hechos-derivados', datos.hechos_derivados);
+    pintarReglas('agenda-reglas', datos.agenda_inicial);
+    pintarReglas('reglas-activadas', datos.reglas_activadas);
+    const prueba = $('prueba-atras');
+    prueba.replaceChildren();
+    prueba.append(datos.prueba_hacia_atras
+        ? nodoPrueba(datos.prueba_hacia_atras)
+        : itemTexto('p', 'No se pudo demostrar la meta con los hechos actuales.', 'kb-muted'));
+    pintarBusqueda('BFS', datos.bfs);
+    pintarBusqueda('DFS', datos.dfs);
+    if (guardar) {
+        recents.unshift({ t: texto, datos });
+        // Conservar solo los últimos 10 para evitar crecimiento de memoria innecesario.
+        if (recents.length > 10) recents.length = 10;
+        pintarHistorial();
+    }
+}
+$('rlist').onclick = e => {
+    const boton = e.target.closest('.ritem');
+    if (!boton) return;
+    const x = recents[Number(boton.dataset.i)];
+    if (!x) return;
+    text.value = x.t;
+    text.dispatchEvent(new Event('input'));
+    render(x.datos, x.t, false);
+};
+
+// Laravel se encarga de ejecutar las reglas: NO es la futura API de SaBERT.
+$('btn-analizar').onclick = async () => {
+    const t = text.value.trim();
+    if (t.length < 20) {
+        text.focus();
+        $('vsub').textContent = 'Escribe al menos 20 caracteres.';
+        return;
+    }
+    if (t.length > 5000) {
+        $('vsub').textContent = 'El texto no puede superar los 5000 caracteres.';
+        return;
+    }
+    const btn = $('btn-analizar'), res = $('result');
+    btn.disabled = true;
+    btn.textContent = 'Analizando…';
+    res.classList.add('scan');
+    $('badge').innerHTML = '<i class="fa-solid fa-spinner"></i>';
+    $('verdict').textContent = 'Procesando';
+    try {
+        const respuesta = await fetch(btn.dataset.endpoint, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ texto: t })
+        });
+        if (!respuesta.ok) {
+            if (respuesta.status === 419) throw new Error('La sesión expiró. Actualiza la página y vuelve a intentarlo.');
+            if (respuesta.status === 422) throw new Error('El texto no cumple con los requisitos (20 a 5000 caracteres).');
+            throw new Error('No fue posible procesar el texto (HTTP ' + respuesta.status + ').');
+        }
+        const datos = await respuesta.json();
+        render(datos, t);
+    } catch (error) {
+        $('verdict').textContent = 'Error de análisis';
+        $('vsub').textContent = error.message;
+    } finally {
+        res.classList.remove('scan');
+        btn.disabled = false;
+        btn.textContent = 'Analizar noticia';
+    }
 };
 </script>
 </body>
