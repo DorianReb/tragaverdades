@@ -1,6 +1,14 @@
 <?php
 
 return [
+    'sabert' => [
+        'url' => env('SABERT_URL', 'http://127.0.0.1:8001'),
+        'endpoint' => env('SABERT_ENDPOINT', '/analizar'),
+        'text_field' => env('SABERT_TEXT_FIELD', 'texto'),
+        'max_characters' => (int) env('SABERT_MAX_CHARACTERS', 100000),
+        'connect_timeout' => env('SABERT_CONNECT_TIMEOUT', 3),
+        'timeout' => env('SABERT_TIMEOUT', 120),
+    ],
 
     /*
     |--------------------------------------------------------------------------

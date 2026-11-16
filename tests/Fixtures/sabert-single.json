@@ -1,0 +1,42 @@
+{
+  "texto_analizado": "El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa.",
+  "modelo": "VerificadoProfesional/SaBERT-Spanish-Fake-News",
+  "clasificacion": "True",
+  "confianza_porcentaje": 78.59,
+  "probabilidades": {
+    "False": 21.41,
+    "True": 78.59
+  },
+  "dispositivo": "cpu",
+  "tokens_procesados": 27,
+  "texto_truncado": false,
+  "advertencia": "La clasificación representa una predicción estadística del modelo, no una verificación independiente de los hechos. El promedio de probabilidades de los fragmentos es orientativo y no constituye una probabilidad calibrada de veracidad de la noticia.",
+  "fragmentos": [
+    {
+      "indice": 0,
+      "inicio_token": 0,
+      "fin_token": 25,
+      "tokens_contenido": 25,
+      "tokens": 27,
+      "clasificacion": "True",
+      "confianza_porcentaje": 78.59,
+      "probabilidades": {
+        "False": 21.411164104938507,
+        "True": 78.58883142471313
+      }
+    }
+  ],
+  "metodo_agregacion": {
+    "nombre": "promedio_probabilidades",
+    "ponderacion": "uniforme_por_fragmento",
+    "probabilidad_calibrada": false,
+    "verificacion_factual": false
+  },
+  "total_tokens_originales": 25,
+  "cantidad_fragmentos": 1,
+  "tokens_contenido_procesados": 25,
+  "tokens_cubiertos": 25,
+  "cobertura_porcentaje": 100,
+  "ventana_tokens": 128,
+  "solapamiento_tokens": 32
+}

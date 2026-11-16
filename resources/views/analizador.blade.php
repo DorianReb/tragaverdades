@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>TragaVerdades · Detector de noticias falsas en español</title>
-<meta name="description" content="Explora señales textuales mediante reglas y algoritmos de búsqueda. La clasificación con SaBERT está pendiente.">
+<meta name="description" content="Analiza noticias en español con SaBERT y explora señales textuales mediante reglas y algoritmos de búsqueda.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 @vite(['resources/js/app.js'])
@@ -127,7 +127,23 @@ textarea:focus{border-color:var(--brand);background:#fff}
 .kb-stats{font-size:12px;margin:7px 0 10px;color:var(--brand)}
 .kb-proof ul{padding-left:18px;border-left:1px dashed var(--line);margin:6px 0 6px 10px}
 .kb-proof li{font-size:12px;line-height:1.7;overflow-wrap:anywhere}
+.sabert-notice{margin-top:16px;padding:14px 16px;border:1px solid #ecd6ad;border-radius:16px;background:var(--warn-soft);color:#754b13;font-size:12px;line-height:1.65}
+.sabert-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:16px}
+.sabert-stats div{border:1px solid var(--line);border-radius:16px;padding:14px 16px;background:#fafbfc;min-width:0}
+.sabert-stats dt{font-size:11px;color:var(--muted);line-height:1.5}
+.sabert-stats dd{font-family:'JetBrains Mono',monospace;font-size:20px;color:var(--brand);margin-top:6px;overflow-wrap:anywhere}
+.sabert-coverage{margin-top:12px}
+.sabert-coverage progress{display:block;width:100%;height:8px;margin:8px 0;accent-color:var(--brand)}
+.sabert-details{margin-top:16px;border:1px solid var(--line);border-radius:16px;background:#fafbfc}
+.sabert-details summary{padding:16px;font-size:13px;font-weight:700;color:var(--brand);cursor:pointer;overflow-wrap:anywhere}
+.sabert-details summary:focus-visible{outline:2px solid var(--brand);outline-offset:3px;border-radius:16px}
+.sabert-fragments{list-style:none;padding:0 16px 16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-height:560px;overflow-y:auto}
+.sabert-fragment{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:14px;min-width:0;overflow-wrap:anywhere}
+.sabert-fragment h3{font-size:13px;color:var(--brand);margin-bottom:8px}
+.sabert-fragment .row{flex-wrap:wrap;gap:6px}
+[hidden]{display:none!important}
 @media(max-width:720px){.kb-grid{grid-template-columns:1fr}}
+@media(max-width:640px){header{flex-wrap:wrap;border-radius:24px}.hr{flex-wrap:wrap}.sabert-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.sabert-fragments{grid-template-columns:1fr}.in-foot{flex-wrap:wrap}.in-foot .go{flex-basis:100%}.in-head{flex-wrap:wrap;gap:10px}}
 </style>
 </head>
 <body>
@@ -175,11 +191,12 @@ textarea:focus{border-color:var(--brand);background:#fff}
         <h2><span class="ico"><i class="fa-regular fa-file-lines"></i></span>Analizador</h2>
         <span class="count" id="count">0 caracteres</span>
       </div>
-      <textarea id="text" placeholder="Pega aquí el titular o el texto completo de la noticia…"></textarea>
+      <textarea id="text" aria-label="Texto de la noticia" aria-describedby="text-limits" placeholder="Pega aquí el titular o el texto completo de la noticia…"></textarea>
+      <p class="kb-muted" id="text-limits">De 20 a {{ number_format(config('services.sabert.max_characters'), 0, ',', ' ') }} caracteres. FastAPI también valida los límites de tokens y fragmentos.</p>
       <div class="in-foot">
         <button class="ghost" id="btn-ejemplo">Ejemplo</button>
         <button class="ghost" id="btn-limpiar">Limpiar</button>
-        <button class="go" id="btn-analizar" data-endpoint="{{ route('analisis.reglas') }}">Analizar noticia</button>
+        <button class="go" id="btn-analizar" data-endpoint="{{ route('analisis.ia') }}" data-max-characters="{{ config('services.sabert.max_characters') }}">Analizar noticia</button>
       </div>
     </section>
 
@@ -204,6 +221,39 @@ textarea:focus{border-color:var(--brand);background:#fff}
         <a href="https://www.animalpolitico.com/verificado" target="_blank" rel="noopener">Verificado <span>México</span></a>
         <a href="https://chequeado.com" target="_blank" rel="noopener">Chequeado <span>Argentina</span></a>
       </div>
+    </section>
+
+    <section class="tile t-kb" id="resultado-sabert" aria-live="polite">
+      <h2><span class="ico"><i class="fa-solid fa-brain"></i></span> SaBERT · Clasificación global</h2>
+      <div class="kb-grid">
+        <div class="kb-panel">
+          <h3 id="sabert-clase">Sin análisis</h3>
+          <p class="kb-muted" id="sabert-estado">Modelo VerificadoProfesional/SaBERT-Spanish-Fake-News.</p>
+        </div>
+        <div class="kb-panel">
+          <div class="row"><span>True (clase del modelo)</span><b id="sabert-true">—</b></div>
+          <div class="row"><span>False (clase del modelo)</span><b id="sabert-false">—</b></div>
+          <p class="kb-muted">Estas probabilidades corresponden al modelo y son independientes de las 17 reglas.</p>
+        </div>
+      </div>
+      <p class="sabert-notice"><strong>La clasificación global es una agregación estadística, no una verificación de hechos.</strong> Las probabilidades no representan veracidad factual. Contrasta siempre con fuentes independientes.</p>
+      <p class="kb-muted" id="sabert-advertencia" hidden></p>
+      <dl class="sabert-stats" aria-label="Estadísticas del documento">
+        <div><dt>Fragmentos analizados</dt><dd id="sabert-fragmentos-total">—</dd></div>
+        <div><dt>Tokens originales</dt><dd id="sabert-tokens-originales">—</dd></div>
+        <div><dt>Tokens procesados</dt><dd id="sabert-tokens-procesados">—</dd></div>
+        <div><dt>Cobertura del documento</dt><dd id="sabert-cobertura">—</dd></div>
+      </dl>
+      <div class="sabert-coverage" id="sabert-cobertura-detalle" hidden>
+        <progress id="sabert-cobertura-barra" max="100" value="0" aria-label="Cobertura del documento"></progress>
+        <p class="kb-muted" id="sabert-tokens-detalle"></p>
+        <p class="kb-muted" id="sabert-metodo"></p>
+      </div>
+      <p class="kb-muted" id="sabert-detalle-estado">Al analizar aparecerán la cobertura y los resultados de cada fragmento.</p>
+      <details class="sabert-details" id="sabert-detalle-fragmentos" hidden>
+        <summary id="sabert-fragmentos-resumen">Ver todos los fragmentos analizados</summary>
+        <ol class="sabert-fragments" id="sabert-fragmentos" aria-label="Resultados por fragmento" tabindex="0"></ol>
+      </details>
     </section>
 
     <section class="tile t-tips">
@@ -238,7 +288,7 @@ const recents = [];
 const EJ = 'URGENTE!!! Científicos NO QUIEREN que sepas esto: el gobierno oculta un remedio secreto que cura todo. Comparte antes de que lo borren. Según fuentes anónimas, millones ya fueron engañados y los medios callan. ¡Despierta!';
 
 text.addEventListener('input', () => {
-    $('count').textContent = text.value.length.toLocaleString('es') + ' caracteres';
+    $('count').textContent = Array.from(text.value).length.toLocaleString('es') + ' caracteres';
 });
 $('btn-limpiar').onclick = () => { text.value = ''; text.dispatchEvent(new Event('input')); };
 $('btn-ejemplo').onclick = () => { text.value = EJ; text.dispatchEvent(new Event('input')); };
@@ -313,7 +363,70 @@ function pintarHistorial() {
         contenedor.append(boton);
     });
 }
+function porcentaje(valor, minimoDecimales = 2) {
+    return valor.toLocaleString('es', { minimumFractionDigits: minimoDecimales, maximumFractionDigits: 2 }) + ' %';
+}
+function limpiarDetalleSaBERT() {
+    for (const id of ['fragmentos-total', 'tokens-originales', 'tokens-procesados', 'cobertura']) $('sabert-' + id).textContent = '—';
+    $('sabert-fragmentos').replaceChildren();
+    $('sabert-detalle-fragmentos').open = false;
+    $('sabert-detalle-fragmentos').hidden = true;
+    $('sabert-cobertura-detalle').hidden = true;
+    $('sabert-cobertura-barra').value = 0;
+    $('sabert-tokens-detalle').textContent = $('sabert-metodo').textContent = '';
+    $('sabert-advertencia').hidden = true;
+    $('sabert-advertencia').textContent = '';
+    $('sabert-detalle-estado').textContent = '';
+}
+function pintarSaBERT(ia) {
+    limpiarDetalleSaBERT();
+    $('sabert-clase').textContent = ia?.disponible ? 'Clasificación global: ' + ia.clasificacion
+        : ia?.error === 'limite_documento' ? 'Documento fuera de límite' : 'SaBERT no disponible';
+    $('sabert-estado').textContent = ia?.disponible
+        ? (ia.modelo || 'Resultado del modelo SaBERT.')
+        : (ia?.mensaje || 'No hay resultado del modelo para este análisis.');
+    for (const etiqueta of ['True', 'False']) {
+        $('sabert-' + etiqueta.toLowerCase()).textContent = ia?.disponible
+            ? porcentaje(100 * ia.probabilidades[etiqueta])
+            : '—';
+    }
+    if (!ia?.disponible) return;
+    if (ia.advertencia) {
+        $('sabert-advertencia').textContent = ia.advertencia;
+        $('sabert-advertencia').hidden = false;
+    }
+    const campos = { 'fragmentos-total': 'cantidad_fragmentos', 'tokens-originales': 'total_tokens_originales', 'tokens-procesados': 'tokens_procesados' };
+    for (const [id, campo] of Object.entries(campos)) {
+        if (Number.isInteger(ia[campo])) $('sabert-' + id).textContent = ia[campo].toLocaleString('es');
+    }
+    if (!ia.fragmentos?.length) {
+        $('sabert-detalle-estado').textContent = 'Esta versión de FastAPI no informa el detalle de fragmentos ni la cobertura. Se conserva el resultado global disponible.';
+        return;
+    }
+    $('sabert-cobertura').textContent = porcentaje(ia.cobertura_porcentaje, 0);
+    $('sabert-cobertura-barra').value = ia.cobertura_porcentaje;
+    $('sabert-cobertura-detalle').hidden = false;
+    $('sabert-tokens-detalle').textContent = `${ia.tokens_cubiertos.toLocaleString('es')} de ${ia.total_tokens_originales.toLocaleString('es')} tokens únicos cubiertos. Los ${ia.tokens_procesados.toLocaleString('es')} tokens procesados incluyen solapamientos y tokens especiales; ${ia.tokens_contenido_procesados.toLocaleString('es')} corresponden a contenido con repeticiones.`;
+    $('sabert-metodo').textContent = `Promedio uniforme de probabilidades por fragmento · Ventana de ${ia.ventana_tokens} tokens · Solapamiento de ${ia.solapamiento_tokens} tokens.`;
+    $('sabert-detalle-estado').textContent = ia.texto_truncado || ia.cobertura_porcentaje < 100
+        ? 'Advertencia: el resultado cubre solo una parte del documento; revisa la cobertura antes de interpretarlo.'
+        : 'Se analizó todo el texto admitido, sin truncamiento.';
+    for (const fragmento of ia.fragmentos) {
+        const li = itemTexto('li', '', 'sabert-fragment');
+        li.append(itemTexto('h3', `Fragmento ${fragmento.indice + 1} · ${fragmento.clasificacion}`));
+        li.append(itemTexto('p', `Tokens de contenido [${fragmento.inicio_token}, ${fragmento.fin_token}) · ${fragmento.tokens} tokens procesados`, 'kb-muted'));
+        for (const etiqueta of ['True', 'False']) {
+            const fila = itemTexto('div', '', 'row');
+            fila.append(itemTexto('span', etiqueta), itemTexto('b', porcentaje(100 * fragmento.probabilidades[etiqueta])));
+            li.append(fila);
+        }
+        $('sabert-fragmentos').append(li);
+    }
+    $('sabert-fragmentos-resumen').textContent = `Ver todos los fragmentos analizados (${ia.cantidad_fragmentos.toLocaleString('es')})`;
+    $('sabert-detalle-fragmentos').hidden = false;
+}
 function render(datos, texto, guardar = true) {
+    pintarSaBERT(datos.sabert);
     const root = document.documentElement.style;
     root.setProperty('--accent', datos.meta_alcanzada ? '#a96a0f' : '#1f3a5f');
     root.setProperty('--accent-soft', datos.meta_alcanzada ? '#fbf1de' : '#eaf0f7');
@@ -356,16 +469,18 @@ $('rlist').onclick = e => {
     render(x.datos, x.t, false);
 };
 
-// Laravel se encarga de ejecutar las reglas: NO es la futura API de SaBERT.
+// Laravel ejecuta las reglas y consulta FastAPI desde el servidor.
 $('btn-analizar').onclick = async () => {
     const t = text.value.trim();
-    if (t.length < 20) {
+    const longitud = Array.from(t).length;
+    const maximo = Number($('btn-analizar').dataset.maxCharacters);
+    if (longitud < 20 || longitud > maximo) {
+        limpiarDetalleSaBERT();
+        $('sabert-clase').textContent = 'Documento no admitido';
+        $('sabert-true').textContent = $('sabert-false').textContent = '—';
+        const mensaje = longitud < 20 ? 'Escribe al menos 20 caracteres.' : `El documento supera el límite de ${maximo.toLocaleString('es')} caracteres. Reduce el texto e intenta nuevamente.`;
         text.focus();
-        $('vsub').textContent = 'Escribe al menos 20 caracteres.';
-        return;
-    }
-    if (t.length > 5000) {
-        $('vsub').textContent = 'El texto no puede superar los 5000 caracteres.';
+        $('sabert-estado').textContent = $('vsub').textContent = mensaje;
         return;
     }
     const btn = $('btn-analizar'), res = $('result');
@@ -374,6 +489,10 @@ $('btn-analizar').onclick = async () => {
     res.classList.add('scan');
     $('badge').innerHTML = '<i class="fa-solid fa-spinner"></i>';
     $('verdict').textContent = 'Procesando';
+    $('sabert-clase').textContent = 'Procesando';
+    $('sabert-estado').textContent = 'Consultando el modelo…';
+    $('sabert-true').textContent = $('sabert-false').textContent = '—';
+    limpiarDetalleSaBERT();
     try {
         const respuesta = await fetch(btn.dataset.endpoint, {
             method: 'POST',
@@ -387,12 +506,19 @@ $('btn-analizar').onclick = async () => {
         });
         if (!respuesta.ok) {
             if (respuesta.status === 419) throw new Error('La sesión expiró. Actualiza la página y vuelve a intentarlo.');
-            if (respuesta.status === 422) throw new Error('El texto no cumple con los requisitos (20 a 5000 caracteres).');
+            if (respuesta.status === 422) {
+                const validacion = await respuesta.json();
+                throw new Error(validacion.errors?.texto?.[0] || 'El documento no cumple con los límites de texto permitidos.');
+            }
+            if (respuesta.status === 413) throw new Error('El documento excede el tamaño permitido por el servidor. Reduce el texto e intenta nuevamente.');
             throw new Error('No fue posible procesar el texto (HTTP ' + respuesta.status + ').');
         }
         const datos = await respuesta.json();
         render(datos, t);
     } catch (error) {
+        limpiarDetalleSaBERT();
+        $('sabert-clase').textContent = 'Sin resultado';
+        $('sabert-estado').textContent = error.message;
         $('verdict').textContent = 'Error de análisis';
         $('vsub').textContent = error.message;
     } finally {

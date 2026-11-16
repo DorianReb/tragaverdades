@@ -1,0 +1,198 @@
+{
+  "texto_analizado": "El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa. El ayuntamiento informó que el nuevo parque público abrirá sus puertas el próximo lunes. La noticia fue presentada durante una conferencia de prensa.",
+  "modelo": "VerificadoProfesional/SaBERT-Spanish-Fake-News",
+  "clasificacion": "True",
+  "confianza_porcentaje": 76.48,
+  "probabilidades": {
+    "False": 23.52,
+    "True": 76.48
+  },
+  "dispositivo": "cpu",
+  "tokens_procesados": 1610,
+  "texto_truncado": false,
+  "advertencia": "La clasificación representa una predicción estadística del modelo, no una verificación independiente de los hechos. El promedio de probabilidades de los fragmentos es orientativo y no constituye una probabilidad calibrada de veracidad de la noticia.",
+  "fragmentos": [
+    {
+      "indice": 0,
+      "inicio_token": 0,
+      "fin_token": 126,
+      "tokens_contenido": 126,
+      "tokens": 128,
+      "clasificacion": "True",
+      "confianza_porcentaje": 75.82,
+      "probabilidades": {
+        "False": 24.1808220744133,
+        "True": 75.81917643547058
+      }
+    },
+    {
+      "indice": 1,
+      "inicio_token": 94,
+      "fin_token": 220,
+      "tokens_contenido": 126,
+      "tokens": 128,
+      "clasificacion": "True",
+      "confianza_porcentaje": 75.19,
+      "probabilidades": {
+        "False": 24.809707701206207,
+        "True": 75.19029378890991
+      }
+    },
+    {
+      "indice": 2,
+      "inicio_token": 188,
+      "fin_token": 314,
+      "tokens_contenido": 126,
+      "tokens": 128,
+      "clasificacion": "True",
+      "confianza_porcentaje": 77.53,
+      "probabilidades": {
+        "False": 22.467640042304993,
+        "True": 77.53235697746277
+      }
+    },
+    {
+      "indice": 3,
+      "inicio_token": 282,
+      "fin_token": 408,
+      "tokens_contenido": 126,
+      "tokens": 128,
+      "clasificacion": "True",
+      "confianza_porcentaje": 73.16,
+      "probabilidades": {
+        "False": 26.84011459350586,
+        "True": 73.15989136695862
+      }
+    },
+    {
+      "indice": 4,
+      "inicio_token": 376,
+      "fin_token": 502,
+      "tokens_contenido": 126,
+      "tokens": 128,
+      "clasificacion": "True",
+      "confianza_porcentaje": 79.93,
+      "probabilidades": {
+        "False": 20.06848156452179,
+        "True": 79.93151545524597
+      }
+    },
+    {
+      "indice": 5,
+      "inicio_token": 470,
+      "fin_token": 596,
+      "tokens_contenido": 126,
+      "tokens": 128,
+      "clasificacion": "True",
+      "confianza_porcentaje": 72.83,
+      "probabilidades": {
+        "False": 27.171888947486877,
+        "True": 72.82810807228088
+      }
+    },
+    {
+      "indice": 6,
+      "inicio_token": 564,
+      "fin_token": 690,
+      "tokens_contenido": 126,
+      "tokens": 128,
+      "clasificacion": "True",
+      "confianza_porcentaje": 87.41,
+      "probabilidades": {
+        "False": 12.592297792434692,
+        "True": 87.40770220756531
+      }
+    },
+    {
+      "indice": 7,
+      "inicio_token": 658,
+      "fin_token": 784,
+      "tokens_contenido": 126,
+      "tokens": 128,
+      "clasificacion": "True",
+      "confianza_porcentaje": 72.57,
+      "probabilidades": {
+        "False": 27.428624033927917,
+        "True": 72.57137298583984
+      }
+    },
+    {
+      "indice": 8,
+      "inicio_token": 752,
+      "fin_token": 878,
+      "tokens_contenido": 126,
+      "tokens": 128,
+      "clasificacion": "True",
+      "confianza_porcentaje": 73.89,
+      "probabilidades": {
+        "False": 26.106759905815125,
+        "True": 73.89323711395264
+      }
+    },
+    {
+      "indice": 9,
+      "inicio_token": 846,
+      "fin_token": 972,
+      "tokens_contenido": 126,
+      "tokens": 128,
+      "clasificacion": "True",
+      "confianza_porcentaje": 83.81,
+      "probabilidades": {
+        "False": 16.188178956508636,
+        "True": 83.81182551383972
+      }
+    },
+    {
+      "indice": 10,
+      "inicio_token": 940,
+      "fin_token": 1066,
+      "tokens_contenido": 126,
+      "tokens": 128,
+      "clasificacion": "True",
+      "confianza_porcentaje": 73.65,
+      "probabilidades": {
+        "False": 26.35209560394287,
+        "True": 73.64790439605713
+      }
+    },
+    {
+      "indice": 11,
+      "inicio_token": 1034,
+      "fin_token": 1160,
+      "tokens_contenido": 126,
+      "tokens": 128,
+      "clasificacion": "True",
+      "confianza_porcentaje": 72.31,
+      "probabilidades": {
+        "False": 27.689149975776672,
+        "True": 72.31084704399109
+      }
+    },
+    {
+      "indice": 12,
+      "inicio_token": 1128,
+      "fin_token": 1200,
+      "tokens_contenido": 72,
+      "tokens": 74,
+      "clasificacion": "True",
+      "confianza_porcentaje": 76.13,
+      "probabilidades": {
+        "False": 23.86908233165741,
+        "True": 76.13091468811035
+      }
+    }
+  ],
+  "metodo_agregacion": {
+    "nombre": "promedio_probabilidades",
+    "ponderacion": "uniforme_por_fragmento",
+    "probabilidad_calibrada": false,
+    "verificacion_factual": false
+  },
+  "total_tokens_originales": 1200,
+  "cantidad_fragmentos": 13,
+  "tokens_contenido_procesados": 1584,
+  "tokens_cubiertos": 1200,
+  "cobertura_porcentaje": 100,
+  "ventana_tokens": 128,
+  "solapamiento_tokens": 32
+}

@@ -1,0 +1,12 @@
+{
+  "detail": [
+    {
+      "loc": [
+        "body",
+        "texto"
+      ],
+      "type": "string_too_long",
+      "msg": "El texto supera el límite de 100000 caracteres"
+    }
+  ]
+}
