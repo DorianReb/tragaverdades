@@ -8,6 +8,8 @@ return [
         'max_characters' => (int) env('SABERT_MAX_CHARACTERS', 100000),
         'connect_timeout' => env('SABERT_CONNECT_TIMEOUT', 3),
         'timeout' => env('SABERT_TIMEOUT', 120),
+        'extraction_endpoint' => env('SABERT_EXTRACTION_ENDPOINT', '/extraer-url'),
+        'extraction_timeout' => env('SABERT_EXTRACTION_TIMEOUT', 30),
     ],
 
     /*

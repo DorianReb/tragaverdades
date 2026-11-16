@@ -2,6 +2,8 @@
 
 Laravel envía el documento completo a FastAPI desde `SaBERTService`. FastAPI carga el modelo, tokeniza, fragmenta e infiere; PHP no reproduce estas operaciones. No se escriben análisis en la base de datos ni se modifican `MotorReglas.php` o las tablas.
 
+El dashboard también permite **Analizar URL** mediante `/analisis-url`: extrae el artículo con FastAPI y envía su contenido al mismo flujo descrito aquí. Consulta la [guía de URL](analisis-url.md) para contrato de metadatos, errores, tiempos e historial. El contrato de `/analisis-ia` permanece igual.
+
 `POST /analisis-ia` recibe `{"texto":"..."}` y devuelve todos los campos del motor simbólico, añadiendo `sabert`. Admite de 20 a 100 000 caracteres por defecto. Se recortan únicamente los espacios exteriores, sin truncar el contenido. `POST /analisis-reglas` conserva su contrato y su límite anterior de 5000 caracteres; no consulta FastAPI.
 
 ## Configuración y arranque
@@ -18,6 +20,8 @@ Laravel usa estos valores de `config/services.php` (también incluidos en `.env.
 | `SABERT_MAX_CHARACTERS` | `100000` |
 | `SABERT_CONNECT_TIMEOUT` | `3` segundos |
 | `SABERT_TIMEOUT` | `120` segundos |
+| `SABERT_EXTRACTION_ENDPOINT` | `/extraer-url` |
+| `SABERT_EXTRACTION_TIMEOUT` | `30` segundos, solo extracción |
 
 Revisa las variables `SABERT_*` de tu `.env`: los valores antiguos `/predict` y `text` anulan los nuevos predeterminados. Después de cambiarlos ejecuta `php artisan config:clear`. El límite de caracteres de Laravel debe corresponder al configurado en FastAPI. El timeout es configurable para documentos largos; no hay reintentos automáticos de inferencia.
 
@@ -108,3 +112,5 @@ python tests/Browser/analizador.py --base-url http://127.0.0.1:8010
 ```
 
 El script envía una noticia sintética a la integración real, verifica todos los fragmentos, porcentajes y resultados simbólicos, y comprueba teclado, historial y presentación a 1440, 768, 390 y 320 px. Después simula errores y respuestas anteriores en el navegador para comprobar limpieza, mensajes y tratamiento de HTML como texto. También verifica un rechazo real por superar los 20 000 tokens y una llamada directa a `/analisis-reglas`. Asume los límites predeterminados de FastAPI. Guarda capturas en una carpeta temporal (o la indicada mediante `--screenshots`).
+
+Para comprobar además extracción y análisis de artículos públicos, ejecuta `python tests/Browser/analizador_url.py --base-url http://127.0.0.1:8010`. La [guía de URL](analisis-url.md#integración-real-en-navegador) incluye el arranque recomendado en Windows y los límites de tiempo necesarios para solicitudes extensas.

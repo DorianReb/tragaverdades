@@ -1,8 +1,10 @@
 # TragaVerdades
 
-Dashboard de análisis de noticias en español con SaBERT (FastAPI) y un motor simbólico de 17 reglas. Incluye clasificación global, resultados por fragmento, tokens y cobertura. Las clasificaciones son estadísticas y no verifican hechos.
+Dashboard de análisis de noticias en español por **texto o URL**, con SaBERT (FastAPI) y un motor simbólico de 17 reglas. Incluye metadatos del artículo, clasificación global, resultados por fragmento, tokens y cobertura. Las clasificaciones son estadísticas y no verifican hechos.
 
 Consulta la [guía de integración de SaBERT](docs/sabert.md) para configurar `/analizar`, interpretar los resultados y ejecutar las pruebas PHP y de navegador.
+
+La [guía de análisis por URL](docs/analisis-url.md) explica `/analisis-url`, la integración con `/extraer-url`, los tiempos de espera, metadatos e historial mixto. El contenido extraído reutiliza el análisis actual de SaBERT y reglas. No hay cambios en la base de datos.
 
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 

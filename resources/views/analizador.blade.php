@@ -82,6 +82,24 @@ textarea:focus{border-color:var(--brand);background:#fff}
 .ghost:hover{border-color:var(--brand);color:var(--brand)}
 .go{flex:1;padding:14px;border-radius:999px;font-weight:700;font-size:14px;color:#fff;background:var(--brand);transition:background .2s}
 .go:hover{background:var(--brand-hover)}.go:disabled{opacity:.6;cursor:wait}
+.input-modes{display:flex;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:4px;margin-bottom:16px}
+.input-modes button{flex:1;padding:10px 8px;border-radius:999px;font-size:13px;font-weight:700;color:var(--muted)}
+.input-modes button[aria-pressed="true"]{background:#fff;color:var(--brand);box-shadow:var(--shadow)}
+.input-modes button:focus-visible,.ghost:focus-visible,.go:focus-visible,.ritem:focus-visible{outline:2px solid var(--brand);outline-offset:3px}
+.input-panel{display:flex;flex-direction:column;flex:1;gap:10px;min-width:0}
+.input-panel label{font-size:13px;font-weight:700;color:var(--brand)}
+.url-field{width:100%;border:1px solid var(--line);border-radius:16px;padding:16px;font:inherit;font-size:14px;background:#fafbfc;color:#344054;outline:none}
+.url-field:focus{border-color:var(--brand);background:#fff}
+.input-status{font-size:12px;line-height:1.6;color:var(--muted);margin-top:12px;overflow-wrap:anywhere}
+.input-status:empty{display:none}
+.article-title{font-size:18px;line-height:1.5;margin-top:16px;overflow-wrap:anywhere}
+.article-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px;font-size:13px}
+.article-meta dt{color:var(--muted);font-size:11px;margin-bottom:5px}
+.article-meta dd{line-height:1.6;overflow-wrap:anywhere}
+.article-links{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;font-size:13px}
+.article-links a{color:var(--brand);font-weight:700;overflow-wrap:anywhere}
+.article-text{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.8;padding:0 16px 16px;max-height:320px;overflow-y:auto}
+button:disabled{cursor:wait}
 
 /* Result */
 .badge{width:56px;height:56px;border-radius:50%;background:#fff;border:1px solid var(--line);display:grid;place-items:center;font-size:22px;color:var(--accent);margin-bottom:10px}
@@ -144,6 +162,7 @@ textarea:focus{border-color:var(--brand);background:#fff}
 [hidden]{display:none!important}
 @media(max-width:720px){.kb-grid{grid-template-columns:1fr}}
 @media(max-width:640px){header{flex-wrap:wrap;border-radius:24px}.hr{flex-wrap:wrap}.sabert-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.sabert-fragments{grid-template-columns:1fr}.in-foot{flex-wrap:wrap}.in-foot .go{flex-basis:100%}.in-head{flex-wrap:wrap;gap:10px}}
+@media(max-width:640px){.article-meta{grid-template-columns:1fr}.input-modes button{font-size:12px}}
 </style>
 </head>
 <body>
@@ -171,7 +190,7 @@ textarea:focus{border-color:var(--brand);background:#fff}
   <main class="bento">
     <section class="tile t-hero">
       <h1>¿Es verdad lo que acabas de leer?</h1>
-      <p>Pega una noticia o publicación en español para explorar señales de alerta y explicar cómo se derivan las recomendaciones.</p>
+      <p>Pega el texto o el enlace de una noticia en español para explorar señales de alerta y explicar cómo se derivan las recomendaciones.</p>
     </section>
 
     <aside class="tile t-legal">
@@ -186,17 +205,29 @@ textarea:focus{border-color:var(--brand);background:#fff}
       <div class="rlist" id="rlist"></div>
     </aside>
 
-    <section class="tile t-input">
+    <section class="tile t-input" id="entrada-noticia" aria-busy="false">
       <div class="in-head">
         <h2><span class="ico"><i class="fa-regular fa-file-lines"></i></span>Analizador</h2>
         <span class="count" id="count">0 caracteres</span>
       </div>
-      <textarea id="text" aria-label="Texto de la noticia" aria-describedby="text-limits" placeholder="Pega aquí el titular o el texto completo de la noticia…"></textarea>
-      <p class="kb-muted" id="text-limits">De 20 a {{ number_format(config('services.sabert.max_characters'), 0, ',', ' ') }} caracteres. FastAPI también valida los límites de tokens y fragmentos.</p>
+      <div class="input-modes" role="group" aria-label="Forma de análisis">
+        <button type="button" id="modo-texto" aria-pressed="true" aria-controls="entrada-texto">Analizar texto</button>
+        <button type="button" id="modo-url" aria-pressed="false" aria-controls="entrada-url">Analizar URL</button>
+      </div>
+      <div class="input-panel" id="entrada-texto">
+        <textarea id="text" aria-label="Texto de la noticia" aria-describedby="text-limits" placeholder="Pega aquí el titular o el texto completo de la noticia…"></textarea>
+        <p class="kb-muted" id="text-limits">De 20 a {{ number_format(config('services.sabert.max_characters'), 0, ',', ' ') }} caracteres. FastAPI también valida los límites de tokens y fragmentos.</p>
+      </div>
+      <div class="input-panel" id="entrada-url" hidden>
+        <label for="url">Enlace de la noticia</label>
+        <input class="url-field" id="url" type="url" maxlength="4096" autocomplete="url" inputmode="url" aria-describedby="url-ayuda" placeholder="https://medio.com/noticia">
+        <p class="kb-muted" id="url-ayuda">Introduce el enlace completo de un artículo público. Extraer y analizar una noticia extensa puede tardar más que analizar texto.</p>
+      </div>
+      <p class="input-status" id="input-estado" role="status" aria-live="polite"></p>
       <div class="in-foot">
         <button class="ghost" id="btn-ejemplo">Ejemplo</button>
         <button class="ghost" id="btn-limpiar">Limpiar</button>
-        <button class="go" id="btn-analizar" data-endpoint="{{ route('analisis.ia') }}" data-max-characters="{{ config('services.sabert.max_characters') }}">Analizar noticia</button>
+        <button class="go" id="btn-analizar" data-endpoint="{{ route('analisis.ia') }}" data-url-endpoint="{{ route('analisis.url') }}" data-max-characters="{{ config('services.sabert.max_characters') }}" data-timeout="{{ ((int) config('services.sabert.timeout') + 15) * 1000 }}" data-url-timeout="{{ ((int) config('services.sabert.timeout') + (int) config('services.sabert.extraction_timeout') + 15) * 1000 }}">Analizar noticia</button>
       </div>
     </section>
 
@@ -221,6 +252,24 @@ textarea:focus{border-color:var(--brand);background:#fff}
         <a href="https://www.animalpolitico.com/verificado" target="_blank" rel="noopener">Verificado <span>México</span></a>
         <a href="https://chequeado.com" target="_blank" rel="noopener">Chequeado <span>Argentina</span></a>
       </div>
+    </section>
+
+    <section class="tile t-kb" id="noticia-extraida" aria-live="polite" hidden>
+      <h2><span class="ico"><i class="fa-regular fa-newspaper"></i></span> Noticia extraída</h2>
+      <h3 class="article-title" id="noticia-titulo" hidden></h3>
+      <dl class="article-meta">
+        <div id="noticia-autor-fila" hidden><dt>Autor</dt><dd id="noticia-autor"></dd></div>
+        <div id="noticia-fecha-fila" hidden><dt>Fecha de publicación</dt><dd id="noticia-fecha"></dd></div>
+        <div id="noticia-dominio-fila" hidden><dt>Dominio</dt><dd id="noticia-dominio"></dd></div>
+      </dl>
+      <div class="article-links">
+        <a id="noticia-enlace" target="_blank" rel="noopener noreferrer" hidden>Abrir enlace original</a>
+        <a id="noticia-enlace-final" target="_blank" rel="noopener noreferrer" hidden>Abrir URL final</a>
+      </div>
+      <details class="sabert-details" id="noticia-detalle">
+        <summary>Ver contenido analizado</summary>
+        <p class="article-text" id="noticia-contenido"></p>
+      </details>
     </section>
 
     <section class="tile t-kb" id="resultado-sabert" aria-live="polite">
@@ -285,13 +334,39 @@ textarea:focus{border-color:var(--brand);background:#fff}
 const $ = id => document.getElementById(id);
 const text = $('text');
 const recents = [];
+let modo = 'texto';
+let procesando = false;
 const EJ = 'URGENTE!!! Científicos NO QUIEREN que sepas esto: el gobierno oculta un remedio secreto que cura todo. Comparte antes de que lo borren. Según fuentes anónimas, millones ya fueron engañados y los medios callan. ¡Despierta!';
+const EJ_URL = 'https://ciencia.nasa.gov/sistema-solar/la-nasa-halla-nueva-forma-en-que-la-tierra-pudo-haber-obtenido-los-elementos-necesarios-para-la-vida/';
 
-text.addEventListener('input', () => {
+function contarTexto() {
     $('count').textContent = Array.from(text.value).length.toLocaleString('es') + ' caracteres';
-});
-$('btn-limpiar').onclick = () => { text.value = ''; text.dispatchEvent(new Event('input')); };
-$('btn-ejemplo').onclick = () => { text.value = EJ; text.dispatchEvent(new Event('input')); };
+}
+text.addEventListener('input', contarTexto);
+$('btn-limpiar').onclick = () => {
+    if (procesando) return;
+    (modo === 'url' ? $('url') : text).value = '';
+    contarTexto();
+    limpiarResultados();
+};
+$('btn-ejemplo').onclick = () => {
+    if (procesando) return;
+    (modo === 'url' ? $('url') : text).value = modo === 'url' ? EJ_URL : EJ;
+    contarTexto();
+};
+function cambiarModo(nuevo) {
+    if (procesando) return;
+    modo = nuevo;
+    $('entrada-texto').hidden = modo !== 'texto';
+    $('entrada-url').hidden = modo !== 'url';
+    $('count').hidden = modo !== 'texto';
+    $('modo-texto').setAttribute('aria-pressed', String(modo === 'texto'));
+    $('modo-url').setAttribute('aria-pressed', String(modo === 'url'));
+    $('btn-analizar').textContent = modo === 'url' ? 'Extraer y analizar noticia' : 'Analizar noticia';
+    limpiarResultados();
+}
+$('modo-texto').onclick = () => cambiarModo('texto');
+$('modo-url').onclick = () => cambiarModo('url');
 document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
     document.querySelectorAll('.seg button').forEach(x => x.classList.remove('on'));
     b.classList.add('on');
@@ -349,6 +424,59 @@ function pintarBusqueda(estrategia, resultado) {
     resultado.recorrido.forEach(r => ol.append(itemTexto('li', r.id + ' → ' + r.entonces)));
     if (!resultado.recorrido.length) ol.append(itemTexto('li', 'Sin recorrido hasta la meta.'));
 }
+function enlacePublicable(valor) {
+    if (typeof valor !== 'string' || /[\s\\]/.test(valor)) return null;
+    try {
+        const enlace = new URL(valor);
+        return ['http:', 'https:'].includes(enlace.protocol) && !enlace.username && !enlace.password ? enlace.href : null;
+    } catch { return null; }
+}
+function pintarNoticia(noticia) {
+    $('noticia-extraida').hidden = !noticia;
+    $('noticia-detalle').open = false;
+    for (const [id, campo] of Object.entries({ titulo: 'titulo', autor: 'autor', fecha: 'fecha_publicacion', dominio: 'dominio' })) {
+        const valor = typeof noticia?.[campo] === 'string' ? noticia[campo] : '';
+        $('noticia-' + id).textContent = valor;
+        const fila = id === 'titulo' ? $('noticia-titulo') : $('noticia-' + id + '-fila');
+        fila.hidden = !valor;
+    }
+    $('noticia-contenido').textContent = noticia?.contenido || '';
+    for (const [id, valor] of [['noticia-enlace', noticia?.url_original], ['noticia-enlace-final', noticia?.url_final !== noticia?.url_original ? noticia?.url_final : null]]) {
+        const href = enlacePublicable(valor);
+        $(id).hidden = !href;
+        $(id).removeAttribute('href');
+        if (href) $(id).href = href;
+    }
+}
+function limpiarResultados() {
+    pintarNoticia(null);
+    limpiarDetalleSaBERT();
+    $('sabert-clase').textContent = 'Sin análisis';
+    $('sabert-estado').textContent = 'Al analizar aparecerán los resultados del modelo.';
+    $('sabert-true').textContent = $('sabert-false').textContent = '—';
+    $('badge').innerHTML = '<i class="fa-solid fa-circle-info"></i>';
+    $('verdict').textContent = 'Sin análisis';
+    $('vsub').textContent = $('input-estado').textContent = '';
+    $('confnum').textContent = $('class').textContent = '—';
+    $('confbar').style.width = '0%';
+    document.documentElement.style.removeProperty('--accent');
+    document.documentElement.style.removeProperty('--accent-soft');
+    $('interpretacion').textContent = 'Al analizar aparecerán los hechos, las reglas y las búsquedas del texto actual.';
+    for (const id of ['hechos-base', 'hechos-derivados']) $(id).replaceChildren(itemTexto('span', 'Sin análisis', 'kb-muted'));
+    for (const id of ['agenda-reglas', 'reglas-activadas', 'bfs-recorrido', 'dfs-recorrido']) $(id).replaceChildren();
+    $('prueba-atras').replaceChildren(itemTexto('p', 'Meta: recomendar_verificacion.', 'kb-muted'));
+    $('bfs-estadisticas').textContent = $('dfs-estadisticas').textContent = '—';
+}
+function indicarProcesamiento(activo) {
+    procesando = activo;
+    $('entrada-noticia').setAttribute('aria-busy', String(activo));
+    for (const id of ['btn-analizar', 'btn-ejemplo', 'btn-limpiar', 'modo-texto', 'modo-url', 'text', 'url']) $(id).disabled = activo;
+    document.querySelectorAll('#rlist .ritem').forEach(boton => { boton.disabled = activo; });
+    $('result').classList.toggle('scan', activo);
+    $('btn-analizar').textContent = activo
+        ? (modo === 'url' ? 'Extrayendo y analizando…' : 'Analizando…')
+        : (modo === 'url' ? 'Extraer y analizar noticia' : 'Analizar noticia');
+}
 function pintarHistorial() {
     $('empty').style.display = recents.length ? 'none' : '';
     const contenedor = $('rlist');
@@ -358,7 +486,10 @@ function pintarHistorial() {
         boton.type = 'button';
         boton.className = 'ritem';
         boton.dataset.i = String(i);
-        boton.append(itemTexto('p', x.t.slice(0, 60) + (x.t.length > 60 ? '…' : '')));
+        boton.disabled = procesando;
+        const titulo = x.datos.noticia?.titulo || (x.tipo === 'url' ? x.datos.noticia?.dominio : x.t) || x.url;
+        boton.append(itemTexto('p', titulo.slice(0, 60) + (titulo.length > 60 ? '…' : '')));
+        boton.append(itemTexto('div', x.tipo === 'url' ? 'URL · ' + x.datos.noticia.dominio : 'Texto manual', 'kb-muted'));
         boton.append(itemTexto('span', x.datos.resultado, 'pill ' + (x.datos.meta_alcanzada ? 'warn' : 'ok')));
         contenedor.append(boton);
     });
@@ -426,6 +557,7 @@ function pintarSaBERT(ia) {
     $('sabert-detalle-fragmentos').hidden = false;
 }
 function render(datos, texto, guardar = true) {
+    pintarNoticia(datos.noticia || null);
     pintarSaBERT(datos.sabert);
     const root = document.documentElement.style;
     root.setProperty('--accent', datos.meta_alcanzada ? '#a96a0f' : '#1f3a5f');
@@ -453,78 +585,90 @@ function render(datos, texto, guardar = true) {
     pintarBusqueda('BFS', datos.bfs);
     pintarBusqueda('DFS', datos.dfs);
     if (guardar) {
-        recents.unshift({ t: texto, datos });
+        recents.unshift({ t: texto, datos, tipo: datos.noticia ? 'url' : 'texto', url: datos.noticia?.url_original || null });
         // Conservar solo los últimos 10 para evitar crecimiento de memoria innecesario.
         if (recents.length > 10) recents.length = 10;
         pintarHistorial();
     }
 }
 $('rlist').onclick = e => {
+    if (procesando) return;
     const boton = e.target.closest('.ritem');
     if (!boton) return;
     const x = recents[Number(boton.dataset.i)];
     if (!x) return;
-    text.value = x.t;
-    text.dispatchEvent(new Event('input'));
+    cambiarModo(x.tipo || 'texto');
+    if (x.tipo === 'url') $('url').value = x.url;
+    else text.value = x.t;
+    contarTexto();
     render(x.datos, x.t, false);
 };
 
 // Laravel ejecuta las reglas y consulta FastAPI desde el servidor.
 $('btn-analizar').onclick = async () => {
-    const t = text.value.trim();
+    if (procesando) return;
+    const porUrl = modo === 'url';
+    const t = (porUrl ? $('url').value : text.value).trim();
     const longitud = Array.from(t).length;
     const maximo = Number($('btn-analizar').dataset.maxCharacters);
-    if (longitud < 20 || longitud > maximo) {
-        limpiarDetalleSaBERT();
+    const urlValida = longitud <= 4096 && enlacePublicable(t);
+    if (porUrl ? !urlValida : longitud < 20 || longitud > maximo) {
+        limpiarResultados();
         $('sabert-clase').textContent = 'Documento no admitido';
-        $('sabert-true').textContent = $('sabert-false').textContent = '—';
-        const mensaje = longitud < 20 ? 'Escribe al menos 20 caracteres.' : `El documento supera el límite de ${maximo.toLocaleString('es')} caracteres. Reduce el texto e intenta nuevamente.`;
-        text.focus();
-        $('sabert-estado').textContent = $('vsub').textContent = mensaje;
+        const mensaje = porUrl ? 'Introduce una URL completa HTTP o HTTPS, sin credenciales y de hasta 4096 caracteres.'
+            : longitud < 20 ? 'Escribe al menos 20 caracteres.' : `El documento supera el límite de ${maximo.toLocaleString('es')} caracteres. Reduce el texto e intenta nuevamente.`;
+        (porUrl ? $('url') : text).focus();
+        $('sabert-estado').textContent = $('vsub').textContent = $('input-estado').textContent = mensaje;
         return;
     }
-    const btn = $('btn-analizar'), res = $('result');
-    btn.disabled = true;
-    btn.textContent = 'Analizando…';
-    res.classList.add('scan');
+    const btn = $('btn-analizar');
+    limpiarResultados();
+    indicarProcesamiento(true);
     $('badge').innerHTML = '<i class="fa-solid fa-spinner"></i>';
     $('verdict').textContent = 'Procesando';
     $('sabert-clase').textContent = 'Procesando';
-    $('sabert-estado').textContent = 'Consultando el modelo…';
-    $('sabert-true').textContent = $('sabert-false').textContent = '—';
-    limpiarDetalleSaBERT();
+    $('sabert-estado').textContent = $('input-estado').textContent = porUrl
+        ? 'Extrayendo el artículo y consultando SaBERT y las reglas. Una noticia extensa puede tardar más.'
+        : 'Consultando SaBERT y analizando las reglas…';
+    const controlador = new AbortController();
+    const tiempo = setTimeout(() => controlador.abort(), Number(porUrl ? btn.dataset.urlTimeout : btn.dataset.timeout));
     try {
-        const respuesta = await fetch(btn.dataset.endpoint, {
+        const respuesta = await fetch(porUrl ? btn.dataset.urlEndpoint : btn.dataset.endpoint, {
             method: 'POST',
             credentials: 'same-origin',
+            signal: controlador.signal,
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
-            body: JSON.stringify({ texto: t })
+            body: JSON.stringify(porUrl ? { url: t } : { texto: t })
         });
         if (!respuesta.ok) {
             if (respuesta.status === 419) throw new Error('La sesión expiró. Actualiza la página y vuelve a intentarlo.');
-            if (respuesta.status === 422) {
-                const validacion = await respuesta.json();
-                throw new Error(validacion.errors?.texto?.[0] || 'El documento no cumple con los límites de texto permitidos.');
-            }
+            if (respuesta.status === 429) throw new Error('Se alcanzó el límite de solicitudes. Espera un momento antes de volver a intentar.');
+            const fallo = await respuesta.json().catch(() => ({}));
+            if (respuesta.status === 422) throw new Error(fallo.errors?.url?.[0] || fallo.errors?.texto?.[0] || fallo.message || 'El documento no cumple con los límites permitidos.');
+            if (porUrl && fallo.message) throw new Error(fallo.message);
             if (respuesta.status === 413) throw new Error('El documento excede el tamaño permitido por el servidor. Reduce el texto e intenta nuevamente.');
-            throw new Error('No fue posible procesar el texto (HTTP ' + respuesta.status + ').');
+            throw new Error('No fue posible procesar la noticia (HTTP ' + respuesta.status + ').');
         }
         const datos = await respuesta.json();
-        render(datos, t);
+        render(datos, porUrl ? datos.noticia.contenido : t);
+        $('input-estado').textContent = datos.sabert?.disponible ? 'Análisis completado.' : 'Análisis por reglas completado. Revisa el estado de SaBERT en los resultados.';
     } catch (error) {
-        limpiarDetalleSaBERT();
+        limpiarResultados();
+        const mensaje = error.name === 'AbortError'
+            ? 'Se agotó el tiempo de espera del análisis. Inténtalo más tarde o prueba con una noticia más corta.'
+            : error instanceof TypeError ? 'No fue posible conectar con el servidor. Comprueba tu conexión e inténtalo de nuevo.'
+            : error instanceof SyntaxError ? 'El servidor devolvió una respuesta no válida. Inténtalo de nuevo más tarde.' : error.message;
         $('sabert-clase').textContent = 'Sin resultado';
-        $('sabert-estado').textContent = error.message;
+        $('sabert-estado').textContent = $('input-estado').textContent = mensaje;
         $('verdict').textContent = 'Error de análisis';
-        $('vsub').textContent = error.message;
+        $('vsub').textContent = mensaje;
     } finally {
-        res.classList.remove('scan');
-        btn.disabled = false;
-        btn.textContent = 'Analizar noticia';
+        clearTimeout(tiempo);
+        indicarProcesamiento(false);
     }
 };
 </script>

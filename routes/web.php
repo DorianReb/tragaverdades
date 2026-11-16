@@ -9,6 +9,9 @@ Route::view('/', 'analizador')->name('analizador');
 Route::post('/analisis-ia', [AnalisisIAController::class, 'analizar'])
     ->middleware('throttle:30,1')->name('analisis.ia');
 
+Route::post('/analisis-url', [AnalisisIAController::class, 'analizarUrl'])
+    ->middleware('throttle:30,1')->name('analisis.url');
+
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
